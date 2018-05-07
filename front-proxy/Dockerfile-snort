@@ -1,0 +1,106 @@
+# Snort in Docker
+
+FROM ubuntu:16.04
+
+MAINTAINER Manos Papoutsakis <paputsak@gmail.com>
+
+RUN apt-get update && \
+    apt-get install -y \
+        wget \
+        build-essential \
+        # Pre-requisites for Snort DAQ (Data AcQuisition library)
+        bison \
+        flex \
+        # Pre-Requisites for snort
+        libpcap-dev \
+        libpcre3-dev \
+        libdumbnet-dev \
+        zlib1g-dev \
+
+        # Optional libraries that improves fuctionality
+        liblzma-dev \
+        openssl \
+        libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Define working directory.
+WORKDIR /opt
+
+# download and install DAQ
+ENV DAQ_VERSION 2.0.6
+RUN wget https://www.snort.org/downloads/snort/daq-${DAQ_VERSION}.tar.gz \
+    && tar xvfz daq-${DAQ_VERSION}.tar.gz \
+    && cd daq-${DAQ_VERSION} \
+    && ./configure; make; make install
+
+# download and install Snort
+ENV SNORT_VERSION 2.9.11.1
+RUN wget https://www.snort.org/downloads/snort/snort-${SNORT_VERSION}.tar.gz \
+    && tar xvfz snort-${SNORT_VERSION}.tar.gz \
+    && cd snort-${SNORT_VERSION} \
+    && ./configure; make; make install
+
+# update shared libraries
+RUN ldconfig
+
+# create a symlink to /usr/sbin/snort:
+RUN ln -s /usr/local/bin/snort /usr/sbin/snort
+
+# create a snort user and group
+RUN groupadd snort && \
+	useradd snort -r -s /sbin/nologin -c SNORT_IDS -g snort
+
+# Create the Snort directories:
+RUN mkdir -p /etc/snort && \
+	mkdir -p /etc/snort/rules && \
+	mkdir -p /etc/snort/rules/iplists && \
+	mkdir -p /etc/snort/preproc_rules && \
+	mkdir -p /usr/local/lib/snort_dynamicrules && \
+	mkdir -p /etc/snort/so_rules && \
+
+	# Create some files that stores rules and ip lists && \
+	touch /etc/snort/rules/iplists/black_list.rules && \
+	touch /etc/snort/rules/iplists/white_list.rules && \
+	touch /etc/snort/rules/local.rules && \
+	touch /etc/snort/sid-msg.map && \
+
+	# Create the logging directories:
+	mkdir -p /var/log/snort && \
+	mkdir -p /var/log/snort/archived_logs && \
+ 
+	# Adjust permissions:
+	chmod -R 5775 /etc/snort && \
+	chmod -R 5775 /var/log/snort && \
+	chmod -R 5775 /var/log/snort/archived_logs && \
+	chmod -R 5775 /etc/snort/so_rules && \
+	chmod -R 5775 /usr/local/lib/snort_dynamicrules && \
+ 
+	# Change Ownership on folders:
+	chown -R snort:snort /etc/snort && \
+	chown -R snort:snort /var/log/snort && \
+	chown -R snort:snort /usr/local/lib/snort_dynamicrules
+
+
+# move files to the /etc/snort folder
+RUN cd /opt/snort-${SNORT_VERSION}/etc/ && \
+	cp *.conf* /etc/snort && \
+	cp *.map /etc/snort && \
+	cp *.dtd /etc/snort && \
+	cd /opt/snort-${SNORT_VERSION}/src/dynamic-preprocessors/build/usr/local/lib/snort_dynamicpreprocessor/ && \
+	cp * /usr/local/lib/snort_dynamicpreprocessor/
+
+# copy our snort.conf into the container\
+COPY src/snort.conf /etc/snort
+
+# copy our local.rules into the container\
+COPY src/local.rules /etc/snort/rules/
+
+ENV NETWORK_INTERFACE eth0
+# Validate an installation
+# snort -T -i eth0 -c /etc/snort/snort.conf
+CMD ["snort", "-T", "-i", "echo ${NETWORK_INTERFACE}", "-c", "/etc/snort/snort.conf"]
+
+CMD ["/usr/local/bin/snort", "-A", "console", "-q", "-u", "snort", "-g", "snort", "-c", "/etc/snort/snort.conf", "-i", "eth0"]
+
+# make container listen on port 80
+EXPOSE 80
