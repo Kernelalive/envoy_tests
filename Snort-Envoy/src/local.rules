@@ -1,3 +1,3 @@
 alert icmp any any -> any any (msg:"Pinging...";sid:1000004;)
 
-alert tcp any any -> any any (msg:"http requesting...";sid:1000005;)
+alert ip any any -> any any (msg:"http requesting...";sid:1000005;)
