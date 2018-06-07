@@ -39,4 +39,4 @@ Start snort and envoy
 Ping/curl the container and snort will alert you about the ping iptables will block the ICMP request.
 
 
-![picture](~/Desktop/asdfasdf.png)
+![alt text](/home/kernelalive/Desktop/asdfasdf.png)
