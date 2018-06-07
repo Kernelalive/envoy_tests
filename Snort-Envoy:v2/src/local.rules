@@ -1,0 +1,9 @@
+alert icmp any any -> any any (msg:"Pinging...";sid:1000004;)
+alert tcp any any -> any any (msg:"http requesting...";sid:1000005; react:block;)
+#reject tcp any any -> any any (msg:"http requesting...";sid:1000006;)
+reject icmp 172.17.0.1 any <> 172.17.0.4 any (msg:"Blocking ICMP Packet from 172.17.0.1"; sid:1000001; rev:1;)
+reject tcp 172.17.0.1 any <> 172.17.0.4 80 (msg:"Blocking HTTP Packet from 172.17.0.1"; sid:1000002; rev:1;)
+#drop tcp any any -> any any (msg:"Dropping packets"; flow:established; sid:1; rev:1; )
+#reject tcp any any -> any any (msg:"Blacklisted URL"; content:"youtube.com";http_uri; react: msg; sid:2;)
+
+
