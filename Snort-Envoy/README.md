@@ -36,7 +36,7 @@ Start snort and envoy
 ```
 
 ## Running the tests
-Ping/curl the container and snort will alert you about the ping iptables will block the ICMP request.
+Ping/curl the container and snort will alert you about the ping iptables will block the ICMP/TCP request.
 
 
 ![alt text](asdfasdf.png)
