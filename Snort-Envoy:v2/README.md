@@ -71,7 +71,5 @@ snort -A console -c /etc/snort/snort.conf -Q -i eth0:eth1 -N
 
 
 ## Running the tests
-Ping/curl the container and snort will alert you about the ping iptables will block the ICMP/TCP request.
+Ping/curl the container and snort will alert you about the ping Snort will block the ICMP/TCP request.
 
-
-![alt text](asdfasdf.png)
