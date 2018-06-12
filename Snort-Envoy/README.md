@@ -40,4 +40,4 @@ Ping/curl the container and snort will alert you about the ping iptables will bl
 ![alt text](asdfasdf.png)
 
 ##	Snort -  Envoy in IPS mode (Container attached to two networks in order for SNort to redirect traffic)
-![https://github.com/Kernelalive/envoy_tests/tree/master/Snort-Envoy:v2]
+![Snort IPS](https://github.com/Kernelalive/envoy_tests/tree/master/Snort-Envoy:v2)
